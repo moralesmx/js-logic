@@ -1,96 +1,151 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apply = void 0;
-function isLogic(logic) {
+function isRule(logic) {
     return Array.isArray(logic) && typeof logic[0] === 'string' && logic[0].startsWith('$');
 }
-function $(logic, data) {
+const $ = (rule, data, local) => {
     let value = data;
-    for (let i = 1; i < logic.length; i++) {
+    for (let i = 1; i < rule.length; i++) {
         if (value) {
-            value = value[apply(logic[i], data)];
+            value = value[apply(rule[i], data, local)];
         }
         else {
             break;
         }
     }
     return value;
-}
-;
-function $And(logic, data) {
-    let value = apply(logic[1], data);
-    for (let i = 2; i < logic.length; i++) {
-        value = value && apply(logic[i], data);
-    }
-    return value;
-}
-;
-function $Or(logic, data) {
-    let value = apply(logic[1], data);
-    for (let i = 2; i < logic.length; i++) {
-        value = value || apply(logic[i], data);
-    }
-    return value;
-}
-;
-function $Equal(logic, data) {
-    return apply(logic[1], data) == apply(logic[2], data);
-}
-;
-function $StrictEqual(logic, data) {
-    return apply(logic[1], data) === apply(logic[2], data);
-}
-;
-function $NotEqual(logic, data) {
-    return apply(logic[1], data) != apply(logic[2], data);
-}
-;
-function $StrictNotEqual(logic, data) {
-    return apply(logic[1], data) !== apply(logic[2], data);
-}
-;
-function $Not(logic, data) {
-    return !apply(logic[1], data);
-}
-;
-function $DoubleNot(logic, data) {
-    return !!apply(logic[1], data);
-}
-;
-function $GraterThan(logic, data) {
-    return apply(logic[1], data) > apply(logic[2], data);
-}
-;
-function $GraterThanOrEqual(logic, data) {
-    return apply(logic[1], data) >= apply(logic[2], data);
-}
-;
-function $LessThan(logic, data) {
-    return apply(logic[1], data) < apply(logic[2], data);
-}
-;
-function $LessThanOrEqual(logic, data) {
-    return apply(logic[1], data) <= apply(logic[2], data);
-}
-;
-function apply(logic, data) {
-    if (isLogic(logic)) {
-        switch (logic[0]) {
-            case '$': return $(logic, data);
-            case '$&&': return $And(logic, data);
-            case '$||': return $Or(logic, data);
-            case '$==': return $Equal(logic, data);
-            case '$===': return $StrictEqual(logic, data);
-            case '$!=': return $NotEqual(logic, data);
-            case '$!==': return $StrictNotEqual(logic, data);
-            case '$!': return $Not(logic, data);
-            case '$!!': return $DoubleNot(logic, data);
-            case '$>': return $GraterThan(logic, data);
-            case '$>=': return $GraterThanOrEqual(logic, data);
-            case '$<': return $LessThan(logic, data);
-            case '$<=': return $LessThanOrEqual(logic, data);
+};
+const $$ = (rule, data, local) => {
+    let value = local;
+    for (let i = 1; i < rule.length; i++) {
+        if (value) {
+            value = value[apply(rule[i], data, local)];
+        }
+        else {
+            break;
         }
     }
-    return logic;
+    return value;
+};
+const $And = (rule, data, local) => {
+    let value = apply(rule[1], data, local);
+    for (let i = 2; i < rule.length; i++) {
+        value = value && apply(rule[i], data, local);
+    }
+    return value;
+};
+const $Or = (rule, data, local) => {
+    let value = apply(rule[1], data, local);
+    for (let i = 2; i < rule.length; i++) {
+        value = value || apply(rule[i], data, local);
+    }
+    return value;
+};
+const $Equal = (rule, data, local) => {
+    return apply(rule[1], data, local) == apply(rule[2], data, local);
+};
+const $StrictEqual = (rule, data, local) => {
+    return apply(rule[1], data, local) === apply(rule[2], data, local);
+};
+const $NotEqual = (rule, data, local) => {
+    return apply(rule[1], data, local) != apply(rule[2], data, local);
+};
+const $StrictNotEqual = (rule, data, local) => {
+    return apply(rule[1], data, local) !== apply(rule[2], data, local);
+};
+const $Not = (rule, data, local) => {
+    return !apply(rule[1], data, local);
+};
+const $DoubleNot = (rule, data, local) => {
+    return !!apply(rule[1], data, local);
+};
+const $GraterThan = (rule, data, local) => {
+    return apply(rule[1], data, local) > apply(rule[2], data, local);
+};
+const $GraterThanOrEqual = (rule, data, local) => {
+    return apply(rule[1], data, local) >= apply(rule[2], data, local);
+};
+const $LessThan = (rule, data, local) => {
+    return apply(rule[1], data, local) < apply(rule[2], data, local);
+};
+const $LessThanOrEqual = (rule, data, local) => {
+    return apply(rule[1], data, local) <= apply(rule[2], data, local);
+};
+const $Addition = (rule, data, local) => {
+    let value = +apply(rule[1], data, local);
+    for (let i = 2; i < rule.length; i++) {
+        value = value + +apply(rule[i], data, local);
+    }
+    return value;
+};
+const $Multiplication = (rule, data, local) => {
+    let value = +apply(rule[1], data, local);
+    for (let i = 2; i < rule.length; i++) {
+        value = value * apply(rule[i], data, local);
+    }
+    return value;
+};
+const $Subtraction = (rule, data, local) => {
+    return apply(rule[1], data, local) - apply(rule[2], data, local);
+};
+const $Division = (rule, data, local) => {
+    return apply(rule[1], data, local) / apply(rule[2], data, local);
+};
+const $Modulo = (rule, data, local) => {
+    return apply(rule[1], data, local) % apply(rule[2], data, local);
+};
+const $Map = (rule, data, local) => {
+    const array = apply(rule[1], data, local);
+    if (Array.isArray(array)) {
+        return array.map(item => apply(rule[2], data, item));
+    }
+    // ? Throw error
+    return undefined;
+};
+const $Filter = (rule, data, local) => {
+    const array = apply(rule[1], data, local);
+    if (Array.isArray(array)) {
+        return array.filter(item => apply(rule[2], data, item));
+    }
+    // ? Throw error
+    return undefined;
+};
+const $Reduce = (rule, data, local) => {
+    const array = apply(rule[1], data, local);
+    if (Array.isArray(array)) {
+        return array.reduce(item => apply(rule[2], data, item), apply(rule[3], data, local));
+    }
+    // ? Throw error
+    return undefined;
+};
+function apply(rule, data, local) {
+    if (isRule(rule)) {
+        switch (rule[0]) {
+            case '$': return $(rule, data, local);
+            case '$$': return $$(rule, data, local);
+            case '$&&': return $And(rule, data, local);
+            case '$||': return $Or(rule, data, local);
+            case '$==': return $Equal(rule, data, local);
+            case '$===': return $StrictEqual(rule, data, local);
+            case '$!=': return $NotEqual(rule, data, local);
+            case '$!==': return $StrictNotEqual(rule, data, local);
+            case '$!': return $Not(rule, data, local);
+            case '$!!': return $DoubleNot(rule, data, local);
+            case '$>': return $GraterThan(rule, data, local);
+            case '$>=': return $GraterThanOrEqual(rule, data, local);
+            case '$<': return $LessThan(rule, data, local);
+            case '$<=': return $LessThanOrEqual(rule, data, local);
+            case '$+': return $Addition(rule, data, local);
+            case '$*': return $Multiplication(rule, data, local);
+            case '$-': return $Subtraction(rule, data, local);
+            case '$/': return $Division(rule, data, local);
+            case '$%': return $Modulo(rule, data, local);
+            case '$map': return $Map(rule, data, local);
+            case '$filter': return $Filter(rule, data, local);
+            case '$reduce': return $Reduce(rule, data, local);
+        }
+    }
+    return rule;
 }
 exports.apply = apply;
