@@ -235,7 +235,7 @@ const $In: Operator<Rule$In, boolean> = (rule, data, local) => {
 };
 
 const $Method: Operator<Rule$Method, any> = (rule, data, local) => {
-  return apply(rule[1], data, local)[apply(rule[2], data, local)](rule.slice(3).map(item => apply(item, data, local)));
+  return apply(rule[1], data, local)[apply(rule[2], data, local)](...rule.slice(3).map(item => apply(item, data, local)));
 };
 
 export function apply(rule: RuleOrValue, data: any, local: any) {
@@ -278,3 +278,5 @@ export function apply(rule: RuleOrValue, data: any, local: any) {
   }
   return rule;
 }
+
+''

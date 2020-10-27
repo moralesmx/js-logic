@@ -145,7 +145,7 @@ const $In = (rule, data, local) => {
     return apply(rule[1], data, local) in apply(rule[2], data, local);
 };
 const $Method = (rule, data, local) => {
-    return apply(rule[1], data, local)[apply(rule[2], data, local)](rule.slice(3).map(item => apply(item, data, local)));
+    return apply(rule[1], data, local)[apply(rule[2], data, local)](...rule.slice(3).map(item => apply(item, data, local)));
 };
 function apply(rule, data, local) {
     if (isRule(rule)) {
@@ -183,3 +183,4 @@ function apply(rule, data, local) {
     return rule;
 }
 exports.apply = apply;
+'';
