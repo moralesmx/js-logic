@@ -23,6 +23,8 @@ type Rule$Map = ['$map', RuleOrValue, RuleOrValue];
 type Rule$Filter = ['$filter', RuleOrValue, RuleOrValue];
 type Rule$Reduce = ['$reduce', RuleOrValue, RuleOrValue, RuleOrValue];
 
+type Rule$Call = ['$call', RuleOrValue, ...RuleOrValue[]];
+
 
 type Rule = Rule$
   | Rule$$
@@ -46,6 +48,7 @@ type Rule = Rule$
   | Rule$Map
   | Rule$Filter
   | Rule$Reduce
+  | Rule$Call
   ;
 
 type RuleOrValue = string | number | Rule;
@@ -191,11 +194,16 @@ const $Reduce: Operator<Rule$Reduce, any> = (rule, data, local) => {
   return undefined;
 };
 
+const $Call: Operator<Rule$Call, any> = (rule, data, local) => {
+  return apply(rule[1], data, local)(rule.slice(2).map(item => apply(item, data, local)));
+};
+
 export function apply(rule: RuleOrValue, data: any, local: any) {
   if (isRule(rule)) {
     switch (rule[0]) {
       case '$': return $(rule, data, local);
       case '$$': return $$(rule, data, local);
+
       case '$&&': return $And(rule, data, local);
       case '$||': return $Or(rule, data, local);
       case '$==': return $Equal(rule, data, local);
@@ -208,14 +216,18 @@ export function apply(rule: RuleOrValue, data: any, local: any) {
       case '$>=': return $GraterThanOrEqual(rule, data, local);
       case '$<': return $LessThan(rule, data, local);
       case '$<=': return $LessThanOrEqual(rule, data, local);
+
       case '$+': return $Addition(rule, data, local);
       case '$*': return $Multiplication(rule, data, local);
       case '$-': return $Subtraction(rule, data, local);
       case '$/': return $Division(rule, data, local);
       case '$%': return $Modulo(rule, data, local);
+
       case '$map': return $Map(rule, data, local);
       case '$filter': return $Filter(rule, data, local);
       case '$reduce': return $Reduce(rule, data, local);
+
+      case '$call': return $Call(rule, data, local);
     }
   }
   return rule;

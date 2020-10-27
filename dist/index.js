@@ -119,6 +119,9 @@ const $Reduce = (rule, data, local) => {
     // ? Throw error
     return undefined;
 };
+const $Call = (rule, data, local) => {
+    return apply(rule[1], data, local)(rule.slice(2).map(item => apply(item, data, local)));
+};
 function apply(rule, data, local) {
     if (isRule(rule)) {
         switch (rule[0]) {
@@ -144,6 +147,7 @@ function apply(rule, data, local) {
             case '$map': return $Map(rule, data, local);
             case '$filter': return $Filter(rule, data, local);
             case '$reduce': return $Reduce(rule, data, local);
+            case '$call': return $Call(rule, data, local);
         }
     }
     return rule;
