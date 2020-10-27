@@ -18,10 +18,18 @@ type Rule$Multiplication = ['$*', ...RuleOrValue[]];
 type Rule$Subtraction = ['$-', RuleOrValue, RuleOrValue];
 type Rule$Division = ['$/', RuleOrValue, RuleOrValue];
 type Rule$Modulo = ['$%', RuleOrValue, RuleOrValue];
+type Rule$Exponentiation = ['$**', RuleOrValue, RuleOrValue];
 
 type Rule$Map = ['$map', RuleOrValue, RuleOrValue];
 type Rule$Filter = ['$filter', RuleOrValue, RuleOrValue];
+type Rule$Every = ['$every', RuleOrValue, RuleOrValue];
+type Rule$Some = ['$some', RuleOrValue, RuleOrValue];
 type Rule$Reduce = ['$reduce', RuleOrValue, RuleOrValue, RuleOrValue];
+
+type Rule$Typeof = ['$typeof', RuleOrValue, RuleOrValue];
+type Rule$In = ['$in', RuleOrValue, RuleOrValue];
+
+type Rule$Method = ['$method', RuleOrValue, RuleOrValue, ...RuleOrValue[]];
 
 type Rule = Rule$
   | Rule$$
@@ -42,17 +50,23 @@ type Rule = Rule$
   | Rule$Subtraction
   | Rule$Division
   | Rule$Modulo
+  | Rule$Exponentiation
   | Rule$Map
   | Rule$Filter
+  | Rule$Every
+  | Rule$Some
   | Rule$Reduce
+  | Rule$Typeof
+  | Rule$In
+  | Rule$Method
   ;
 
 type RuleOrValue = string | number | Rule;
 
 type Operator<Rule, Returns> = (rule: Rule, data: any, local: any) => Returns;
 
-function isRule(logic: RuleOrValue): logic is Rule {
-  return Array.isArray(logic) && typeof logic[0] === 'string' && logic[0].startsWith('$');
+function isRule(rule: RuleOrValue): rule is Rule {
+  return Array.isArray(rule) && typeof rule[0] === 'string' && rule[0].startsWith('$');
 }
 
 const $: Operator<Rule$, any> = (rule, data, local) => {
@@ -163,6 +177,10 @@ const $Modulo: Operator<Rule$Modulo, number> = (rule, data, local) => {
   return apply(rule[1], data, local) % apply(rule[2], data, local);
 };
 
+const $Exponentiation: Operator<Rule$Exponentiation, number> = (rule, data, local) => {
+  return apply(rule[1], data, local) ** apply(rule[2], data, local);
+};
+
 const $Map: Operator<Rule$Map, any> = (rule, data, local) => {
   const array = apply(rule[1], data, local);
   if (Array.isArray(array)) {
@@ -181,6 +199,24 @@ const $Filter: Operator<Rule$Filter, any> = (rule, data, local) => {
   return undefined;
 };
 
+const $Every: Operator<Rule$Every, boolean> = (rule, data, local) => {
+  const array = apply(rule[1], data, local);
+  if (Array.isArray(array)) {
+    return array.every(item => apply(rule[2], data, item));
+  }
+  // ? Throw error
+  return false;
+};
+
+const $Some: Operator<Rule$Some, boolean> = (rule, data, local) => {
+  const array = apply(rule[1], data, local);
+  if (Array.isArray(array)) {
+    return array.some(item => apply(rule[2], data, item));
+  }
+  // ? Throw error
+  return false;
+};
+
 const $Reduce: Operator<Rule$Reduce, any> = (rule, data, local) => {
   const array = apply(rule[1], data, local);
   if (Array.isArray(array)) {
@@ -188,6 +224,18 @@ const $Reduce: Operator<Rule$Reduce, any> = (rule, data, local) => {
   }
   // ? Throw error
   return undefined;
+};
+
+const $Typeof: Operator<Rule$Typeof, boolean> = (rule, data, local) => {
+  return typeof apply(rule[1], data, local) === apply(rule[2], data, local);
+};
+
+const $In: Operator<Rule$In, boolean> = (rule, data, local) => {
+  return apply(rule[1], data, local) in apply(rule[2], data, local);
+};
+
+const $Method: Operator<Rule$Method, any> = (rule, data, local) => {
+  return apply(rule[1], data, local)[apply(rule[2], data, local)](rule.slice(3).map(item => apply(item, data, local)));
 };
 
 export function apply(rule: RuleOrValue, data: any, local: any) {
@@ -214,11 +262,18 @@ export function apply(rule: RuleOrValue, data: any, local: any) {
       case '$-': return $Subtraction(rule, data, local);
       case '$/': return $Division(rule, data, local);
       case '$%': return $Modulo(rule, data, local);
+      case '$**': return $Exponentiation(rule, data, local);
 
       case '$map': return $Map(rule, data, local);
       case '$filter': return $Filter(rule, data, local);
+      case '$every': return $Every(rule, data, local);
+      case '$some': return $Some(rule, data, local);
       case '$reduce': return $Reduce(rule, data, local);
 
+      case '$typeof': return $Typeof(rule, data, local);
+      case '$in': return $In(rule, data, local);
+
+      case '$method': return $Method(rule, data, local);
     }
   }
   return rule;

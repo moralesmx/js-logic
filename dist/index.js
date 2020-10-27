@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apply = void 0;
-function isRule(logic) {
-    return Array.isArray(logic) && typeof logic[0] === 'string' && logic[0].startsWith('$');
+function isRule(rule) {
+    return Array.isArray(rule) && typeof rule[0] === 'string' && rule[0].startsWith('$');
 }
 const $ = (rule, data, local) => {
     let value = data;
@@ -95,6 +95,9 @@ const $Division = (rule, data, local) => {
 const $Modulo = (rule, data, local) => {
     return apply(rule[1], data, local) % apply(rule[2], data, local);
 };
+const $Exponentiation = (rule, data, local) => {
+    return Math.pow(apply(rule[1], data, local), apply(rule[2], data, local));
+};
 const $Map = (rule, data, local) => {
     const array = apply(rule[1], data, local);
     if (Array.isArray(array)) {
@@ -111,6 +114,22 @@ const $Filter = (rule, data, local) => {
     // ? Throw error
     return undefined;
 };
+const $Every = (rule, data, local) => {
+    const array = apply(rule[1], data, local);
+    if (Array.isArray(array)) {
+        return array.every(item => apply(rule[2], data, item));
+    }
+    // ? Throw error
+    return false;
+};
+const $Some = (rule, data, local) => {
+    const array = apply(rule[1], data, local);
+    if (Array.isArray(array)) {
+        return array.some(item => apply(rule[2], data, item));
+    }
+    // ? Throw error
+    return false;
+};
 const $Reduce = (rule, data, local) => {
     const array = apply(rule[1], data, local);
     if (Array.isArray(array)) {
@@ -118,6 +137,15 @@ const $Reduce = (rule, data, local) => {
     }
     // ? Throw error
     return undefined;
+};
+const $Typeof = (rule, data, local) => {
+    return typeof apply(rule[1], data, local) === apply(rule[2], data, local);
+};
+const $In = (rule, data, local) => {
+    return apply(rule[1], data, local) in apply(rule[2], data, local);
+};
+const $Method = (rule, data, local) => {
+    return apply(rule[1], data, local)[apply(rule[2], data, local)](rule.slice(3).map(item => apply(item, data, local)));
 };
 function apply(rule, data, local) {
     if (isRule(rule)) {
@@ -141,9 +169,15 @@ function apply(rule, data, local) {
             case '$-': return $Subtraction(rule, data, local);
             case '$/': return $Division(rule, data, local);
             case '$%': return $Modulo(rule, data, local);
+            case '$**': return $Exponentiation(rule, data, local);
             case '$map': return $Map(rule, data, local);
             case '$filter': return $Filter(rule, data, local);
+            case '$every': return $Every(rule, data, local);
+            case '$some': return $Some(rule, data, local);
             case '$reduce': return $Reduce(rule, data, local);
+            case '$typeof': return $Typeof(rule, data, local);
+            case '$in': return $In(rule, data, local);
+            case '$method': return $Method(rule, data, local);
         }
     }
     return rule;
