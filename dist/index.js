@@ -183,4 +183,3 @@ function apply(rule, data, local) {
     return rule;
 }
 exports.apply = apply;
-'';

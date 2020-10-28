@@ -278,5 +278,3 @@ export function apply(rule: RuleOrValue, data: any, local: any) {
   }
   return rule;
 }
-
-''
