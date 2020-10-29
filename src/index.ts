@@ -1,5 +1,7 @@
+
 type Rule$ = ['$', ...RuleOrValue[]];
 type Rule$$ = ['$$', ...RuleOrValue[]];
+
 type Rule$And = ['$&&', ...RuleOrValue[]];
 type Rule$Or = ['$||', ...RuleOrValue[]];
 type Rule$Equal = ['$==', RuleOrValue, RuleOrValue];
@@ -20,18 +22,17 @@ type Rule$Division = ['$/', RuleOrValue, RuleOrValue];
 type Rule$Modulo = ['$%', RuleOrValue, RuleOrValue];
 type Rule$Exponentiation = ['$**', RuleOrValue, RuleOrValue];
 
-type Rule$Map = ['$map', RuleOrValue, RuleOrValue];
-type Rule$Filter = ['$filter', RuleOrValue, RuleOrValue];
-type Rule$Every = ['$every', RuleOrValue, RuleOrValue];
-type Rule$Some = ['$some', RuleOrValue, RuleOrValue];
-type Rule$Reduce = ['$reduce', RuleOrValue, RuleOrValue, RuleOrValue];
-
-type Rule$Typeof = ['$typeof', RuleOrValue, RuleOrValue];
 type Rule$In = ['$in', RuleOrValue, RuleOrValue];
+type Rule$Typeof = ['$typeof', RuleOrValue];
 
-type Rule$Method = ['$method', RuleOrValue, RuleOrValue, ...RuleOrValue[]];
+type Rule$Method = ['$()', RuleOrValue, RuleOrValue, ...RuleOrValue[]];
 
-type Rule = Rule$
+type Rule$Arrow = ['$=>', RuleOrValue];
+
+type Rule$Array = ['$[]', ...RuleOrValue[]];
+
+type Rule =
+  | Rule$
   | Rule$$
   | Rule$And
   | Rule$Or
@@ -51,29 +52,26 @@ type Rule = Rule$
   | Rule$Division
   | Rule$Modulo
   | Rule$Exponentiation
-  | Rule$Map
-  | Rule$Filter
-  | Rule$Every
-  | Rule$Some
-  | Rule$Reduce
-  | Rule$Typeof
   | Rule$In
+  | Rule$Typeof
   | Rule$Method
+  | Rule$Arrow
+  | Rule$Array
   ;
 
 type RuleOrValue = string | number | Rule;
 
-type Operator<Rule, Returns> = (rule: Rule, data: any, local: any) => Returns;
+type Operator<Rule, Returns> = (rule: Rule, data: any, args: any[]) => Returns;
 
 function isRule(rule: RuleOrValue): rule is Rule {
   return Array.isArray(rule) && typeof rule[0] === 'string' && rule[0].startsWith('$');
 }
 
-const $: Operator<Rule$, any> = (rule, data, local) => {
+const $: Operator<Rule$, any> = (rule, data, args) => {
   let value = data;
   for (let i = 1; i < rule.length; i++) {
     if (value) {
-      value = value[apply(rule[i], data, local)];
+      value = value[apply(rule[i], data, args)];
     } else {
       break;
     }
@@ -81,11 +79,11 @@ const $: Operator<Rule$, any> = (rule, data, local) => {
   return value;
 };
 
-const $$: Operator<Rule$$, any> = (rule, data, local) => {
-  let value = local;
+const $$: Operator<Rule$$, any> = (rule, data, args) => {
+  let value = args;
   for (let i = 1; i < rule.length; i++) {
     if (value) {
-      value = value[apply(rule[i], data, local)];
+      value = value[apply(rule[i], data, args)];
     } else {
       break;
     }
@@ -93,188 +91,149 @@ const $$: Operator<Rule$$, any> = (rule, data, local) => {
   return value;
 };
 
-const $And: Operator<Rule$And, any> = (rule, data, local) => {
-  let value = apply(rule[1], data, local);
+const $And: Operator<Rule$And, any> = (rule, data, args) => {
+  let value = apply(rule[1], data, args);
   for (let i = 2; i < rule.length; i++) {
-    value = value && apply(rule[i], data, local);
+    value = value && apply(rule[i], data, args);
   }
   return value;
 };
 
-const $Or: Operator<Rule$Or, any> = (rule, data, local) => {
-  let value = apply(rule[1], data, local);
+const $Or: Operator<Rule$Or, any> = (rule, data, args) => {
+  let value = apply(rule[1], data, args);
   for (let i = 2; i < rule.length; i++) {
-    value = value || apply(rule[i], data, local);
+    value = value || apply(rule[i], data, args);
   }
   return value;
 };
 
-const $Equal: Operator<Rule$Equal, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) == apply(rule[2], data, local);
+const $Equal: Operator<Rule$Equal, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) == apply(rule[2], data, args);
 };
 
-const $StrictEqual: Operator<Rule$StrictEqual, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) === apply(rule[2], data, local);
+const $StrictEqual: Operator<Rule$StrictEqual, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) === apply(rule[2], data, args);
 };
 
-const $NotEqual: Operator<Rule$NotEqual, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) != apply(rule[2], data, local);
+const $NotEqual: Operator<Rule$NotEqual, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) != apply(rule[2], data, args);
 };
 
-const $StrictNotEqual: Operator<Rule$StrictNotEqual, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) !== apply(rule[2], data, local);
+const $StrictNotEqual: Operator<Rule$StrictNotEqual, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) !== apply(rule[2], data, args);
 };
 
-const $Not: Operator<Rule$Not, boolean> = (rule, data, local) => {
-  return !apply(rule[1], data, local);
+const $Not: Operator<Rule$Not, boolean> = (rule, data, args) => {
+  return !apply(rule[1], data, args);
 };
 
-const $DoubleNot: Operator<Rule$DoubleNot, boolean> = (rule, data, local) => {
-  return !!apply(rule[1], data, local);
+const $DoubleNot: Operator<Rule$DoubleNot, boolean> = (rule, data, args) => {
+  return !!apply(rule[1], data, args);
 };
 
-const $GraterThan: Operator<Rule$GraterThan, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) > apply(rule[2], data, local);
+const $GraterThan: Operator<Rule$GraterThan, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) > apply(rule[2], data, args);
 };
 
-const $GraterThanOrEqual: Operator<Rule$GraterThanOrEqual, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) >= apply(rule[2], data, local);
+const $GraterThanOrEqual: Operator<Rule$GraterThanOrEqual, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) >= apply(rule[2], data, args);
 };
 
-const $LessThan: Operator<Rule$LessThan, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) < apply(rule[2], data, local);
+const $LessThan: Operator<Rule$LessThan, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) < apply(rule[2], data, args);
 };
 
-const $LessThanOrEqual: Operator<Rule$LessThanOrEqual, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) <= apply(rule[2], data, local);
+const $LessThanOrEqual: Operator<Rule$LessThanOrEqual, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) <= apply(rule[2], data, args);
 };
 
-const $Addition: Operator<Rule$Addition, number> = (rule, data, local) => {
-  let value = +apply(rule[1], data, local);
+const $Addition: Operator<Rule$Addition, number> = (rule, data, args) => {
+  let value = +apply(rule[1], data, args);
   for (let i = 2; i < rule.length; i++) {
-    value = value + +apply(rule[i], data, local);
+    value = value + +apply(rule[i], data, args);
   }
   return value;
 };
 
-const $Multiplication: Operator<Rule$Multiplication, number> = (rule, data, local) => {
-  let value = +apply(rule[1], data, local);
+const $Multiplication: Operator<Rule$Multiplication, number> = (rule, data, args) => {
+  let value = +apply(rule[1], data, args);
   for (let i = 2; i < rule.length; i++) {
-    value = value * apply(rule[i], data, local);
+    value = value * +apply(rule[i], data, args);
   }
   return value;
 };
 
-const $Subtraction: Operator<Rule$Subtraction, number> = (rule, data, local) => {
-  return apply(rule[1], data, local) - apply(rule[2], data, local);
+const $Subtraction: Operator<Rule$Subtraction, number> = (rule, data, args) => {
+  return apply(rule[1], data, args) - apply(rule[2], data, args);
 };
 
-const $Division: Operator<Rule$Division, number> = (rule, data, local) => {
-  return apply(rule[1], data, local) / apply(rule[2], data, local);
+const $Division: Operator<Rule$Division, number> = (rule, data, args) => {
+  return apply(rule[1], data, args) / apply(rule[2], data, args);
 };
 
-const $Modulo: Operator<Rule$Modulo, number> = (rule, data, local) => {
-  return apply(rule[1], data, local) % apply(rule[2], data, local);
+const $Modulo: Operator<Rule$Modulo, number> = (rule, data, args) => {
+  return apply(rule[1], data, args) % apply(rule[2], data, args);
 };
 
-const $Exponentiation: Operator<Rule$Exponentiation, number> = (rule, data, local) => {
-  return apply(rule[1], data, local) ** apply(rule[2], data, local);
+const $Exponentiation: Operator<Rule$Exponentiation, number> = (rule, data, args) => {
+  return apply(rule[1], data, args) ** apply(rule[2], data, args);
 };
 
-const $Map: Operator<Rule$Map, any> = (rule, data, local) => {
-  const array = apply(rule[1], data, local);
-  if (Array.isArray(array)) {
-    return array.map(item => apply(rule[2], data, item));
-  }
-  // ? Throw error
-  return undefined;
+const $In: Operator<Rule$In, boolean> = (rule, data, args) => {
+  return apply(rule[1], data, args) in apply(rule[2], data, args);
 };
 
-const $Filter: Operator<Rule$Filter, any> = (rule, data, local) => {
-  const array = apply(rule[1], data, local);
-  if (Array.isArray(array)) {
-    return array.filter(item => apply(rule[2], data, item));
-  }
-  // ? Throw error
-  return undefined;
+const $Typeof: Operator<Rule$Typeof, any> = (rule, data, args) => {
+  return typeof apply(rule[1], data, args);
 };
 
-const $Every: Operator<Rule$Every, boolean> = (rule, data, local) => {
-  const array = apply(rule[1], data, local);
-  if (Array.isArray(array)) {
-    return array.every(item => apply(rule[2], data, item));
-  }
-  // ? Throw error
-  return false;
+const $Method: Operator<Rule$Method, any> = (rule, data, args) => {
+  return apply(rule[1], data, args)[apply(rule[2], data, args)](...rule.slice(3).map(item => apply(item, data, args)));
 };
 
-const $Some: Operator<Rule$Some, boolean> = (rule, data, local) => {
-  const array = apply(rule[1], data, local);
-  if (Array.isArray(array)) {
-    return array.some(item => apply(rule[2], data, item));
-  }
-  // ? Throw error
-  return false;
+const $Arrow: Operator<Rule$Arrow, any> = (rule, data, args) => {
+  return (...args: any[]) => apply(rule[1], data, args);
 };
 
-const $Reduce: Operator<Rule$Reduce, any> = (rule, data, local) => {
-  const array = apply(rule[1], data, local);
-  if (Array.isArray(array)) {
-    return array.reduce(item => apply(rule[2], data, item), apply(rule[3], data, local));
-  }
-  // ? Throw error
-  return undefined;
+const $Array: Operator<Rule$Array, any> = (rule, data, args) => {
+  return rule.slice(1).map(item => apply(item, data, args));
 };
 
-const $Typeof: Operator<Rule$Typeof, boolean> = (rule, data, local) => {
-  return typeof apply(rule[1], data, local) === apply(rule[2], data, local);
-};
-
-const $In: Operator<Rule$In, boolean> = (rule, data, local) => {
-  return apply(rule[1], data, local) in apply(rule[2], data, local);
-};
-
-const $Method: Operator<Rule$Method, any> = (rule, data, local) => {
-  return apply(rule[1], data, local)[apply(rule[2], data, local)](...rule.slice(3).map(item => apply(item, data, local)));
-};
-
-export function apply(rule: RuleOrValue, data: any, local: any) {
+export const apply: Operator<RuleOrValue, any> = (rule, data, args) => {
   if (isRule(rule)) {
     switch (rule[0]) {
-      case '$': return $(rule, data, local);
-      case '$$': return $$(rule, data, local);
+      case '$': return $(rule, data, args);
+      case '$$': return $$(rule, data, args);
 
-      case '$&&': return $And(rule, data, local);
-      case '$||': return $Or(rule, data, local);
-      case '$==': return $Equal(rule, data, local);
-      case '$===': return $StrictEqual(rule, data, local);
-      case '$!=': return $NotEqual(rule, data, local);
-      case '$!==': return $StrictNotEqual(rule, data, local);
-      case '$!': return $Not(rule, data, local);
-      case '$!!': return $DoubleNot(rule, data, local);
-      case '$>': return $GraterThan(rule, data, local);
-      case '$>=': return $GraterThanOrEqual(rule, data, local);
-      case '$<': return $LessThan(rule, data, local);
-      case '$<=': return $LessThanOrEqual(rule, data, local);
+      case '$&&': return $And(rule, data, args);
+      case '$||': return $Or(rule, data, args);
+      case '$==': return $Equal(rule, data, args);
+      case '$===': return $StrictEqual(rule, data, args);
+      case '$!=': return $NotEqual(rule, data, args);
+      case '$!==': return $StrictNotEqual(rule, data, args);
+      case '$!': return $Not(rule, data, args);
+      case '$!!': return $DoubleNot(rule, data, args);
+      case '$>': return $GraterThan(rule, data, args);
+      case '$>=': return $GraterThanOrEqual(rule, data, args);
+      case '$<': return $LessThan(rule, data, args);
+      case '$<=': return $LessThanOrEqual(rule, data, args);
 
-      case '$+': return $Addition(rule, data, local);
-      case '$*': return $Multiplication(rule, data, local);
-      case '$-': return $Subtraction(rule, data, local);
-      case '$/': return $Division(rule, data, local);
-      case '$%': return $Modulo(rule, data, local);
-      case '$**': return $Exponentiation(rule, data, local);
+      case '$+': return $Addition(rule, data, args);
+      case '$*': return $Multiplication(rule, data, args);
+      case '$-': return $Subtraction(rule, data, args);
+      case '$/': return $Division(rule, data, args);
+      case '$%': return $Modulo(rule, data, args);
+      case '$**': return $Exponentiation(rule, data, args);
 
-      case '$map': return $Map(rule, data, local);
-      case '$filter': return $Filter(rule, data, local);
-      case '$every': return $Every(rule, data, local);
-      case '$some': return $Some(rule, data, local);
-      case '$reduce': return $Reduce(rule, data, local);
+      case '$in': return $In(rule, data, args);
+      case '$typeof': return $Typeof(rule, data, args);
 
-      case '$typeof': return $Typeof(rule, data, local);
-      case '$in': return $In(rule, data, local);
+      case '$()': return $Method(rule, data, args);
 
-      case '$method': return $Method(rule, data, local);
+      case '$=>': return $Arrow(rule, data, args);
+
+      case '$[]': return $Array(rule, data, args);
     }
   }
   return rule;
-}
+};
