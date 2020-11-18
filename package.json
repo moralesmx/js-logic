@@ -1,7 +1,7 @@
 {
-  "name": "logic",
+  "name": "js-logic",
   "version": "1.0.0",
-  "description": "",
+  "description": "Javascript logic serializable natively to json",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
