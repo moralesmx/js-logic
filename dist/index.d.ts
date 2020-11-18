@@ -25,7 +25,7 @@ declare type Rule$Arrow = ['$=>', RuleOrValue];
 declare type Rule$Array = ['$[]', ...RuleOrValue[]];
 declare type Rule$Undefined = ['$undefined'];
 declare type Rule = Rule$ | Rule$$ | Rule$And | Rule$Or | Rule$Equal | Rule$StrictEqual | Rule$NotEqual | Rule$StrictNotEqual | Rule$Not | Rule$DoubleNot | Rule$GraterThan | Rule$GraterThanOrEqual | Rule$LessThan | Rule$LessThanOrEqual | Rule$Addition | Rule$Multiplication | Rule$Subtraction | Rule$Division | Rule$Modulo | Rule$Exponentiation | Rule$In | Rule$Typeof | Rule$Method | Rule$Arrow | Rule$Array | Rule$Undefined;
-declare type RuleOrValue = string | number | Rule;
+declare type RuleOrValue = null | number | string | object | Rule;
 declare type Operator<Rule, Returns> = (rule: Rule, data: any, args: any[]) => Returns;
 export declare const apply: Operator<RuleOrValue, any>;
 export {};
