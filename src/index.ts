@@ -31,6 +31,8 @@ type Rule$Arrow = ['$=>', RuleOrValue];
 
 type Rule$Array = ['$[]', ...RuleOrValue[]];
 
+type Rule$Undefined = ['$undefined'];
+
 type Rule =
   | Rule$
   | Rule$$
@@ -57,6 +59,7 @@ type Rule =
   | Rule$Method
   | Rule$Arrow
   | Rule$Array
+  | Rule$Undefined
   ;
 
 type RuleOrValue = string | number | Rule;
@@ -199,6 +202,10 @@ const $Array: Operator<Rule$Array, any> = (rule, data, args) => {
   return rule.slice(1).map(item => apply(item, data, args));
 };
 
+const $Undefined: Operator<Rule$Undefined, any> = (rule, data, args) => {
+  return undefined;
+};
+
 export const apply: Operator<RuleOrValue, any> = (rule, data, args) => {
   if (isRule(rule)) {
     switch (rule[0]) {
@@ -233,6 +240,8 @@ export const apply: Operator<RuleOrValue, any> = (rule, data, args) => {
       case '$=>': return $Arrow(rule, data, args);
 
       case '$[]': return $Array(rule, data, args);
+
+      case '$undefined': return $Undefined(rule, data, args);
     }
   }
   return rule;

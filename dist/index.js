@@ -113,6 +113,9 @@ const $Arrow = (rule, data, args) => {
 const $Array = (rule, data, args) => {
     return rule.slice(1).map(item => exports.apply(item, data, args));
 };
+const $Undefined = (rule, data, args) => {
+    return undefined;
+};
 exports.apply = (rule, data, args) => {
     if (isRule(rule)) {
         switch (rule[0]) {
@@ -141,6 +144,7 @@ exports.apply = (rule, data, args) => {
             case '$()': return $Method(rule, data, args);
             case '$=>': return $Arrow(rule, data, args);
             case '$[]': return $Array(rule, data, args);
+            case '$undefined': return $Undefined(rule, data, args);
         }
     }
     return rule;
