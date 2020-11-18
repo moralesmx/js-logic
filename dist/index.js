@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.apply = void 0;
+exports.JsLogic = void 0;
 function isRule(rule) {
     return Array.isArray(rule) && typeof rule[0] === 'string' && rule[0].startsWith('$');
 }
@@ -8,7 +8,7 @@ const $ = (rule, data, args) => {
     let value = data;
     for (let i = 1; i < rule.length; i++) {
         if (value) {
-            value = value[exports.apply(rule[i], data, args)];
+            value = value[apply(rule[i], data, args)];
         }
         else {
             break;
@@ -20,7 +20,7 @@ const $$ = (rule, data, args) => {
     let value = args;
     for (let i = 1; i < rule.length; i++) {
         if (value) {
-            value = value[exports.apply(rule[i], data, args)];
+            value = value[apply(rule[i], data, args)];
         }
         else {
             break;
@@ -29,94 +29,94 @@ const $$ = (rule, data, args) => {
     return value;
 };
 const $And = (rule, data, args) => {
-    let value = exports.apply(rule[1], data, args);
+    let value = apply(rule[1], data, args);
     for (let i = 2; i < rule.length; i++) {
-        value = value && exports.apply(rule[i], data, args);
+        value = value && apply(rule[i], data, args);
     }
     return value;
 };
 const $Or = (rule, data, args) => {
-    let value = exports.apply(rule[1], data, args);
+    let value = apply(rule[1], data, args);
     for (let i = 2; i < rule.length; i++) {
-        value = value || exports.apply(rule[i], data, args);
+        value = value || apply(rule[i], data, args);
     }
     return value;
 };
 const $Equal = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) == exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) == apply(rule[2], data, args);
 };
 const $StrictEqual = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) === exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) === apply(rule[2], data, args);
 };
 const $NotEqual = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) != exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) != apply(rule[2], data, args);
 };
 const $StrictNotEqual = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) !== exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) !== apply(rule[2], data, args);
 };
 const $Not = (rule, data, args) => {
-    return !exports.apply(rule[1], data, args);
+    return !apply(rule[1], data, args);
 };
 const $DoubleNot = (rule, data, args) => {
-    return !!exports.apply(rule[1], data, args);
+    return !!apply(rule[1], data, args);
 };
 const $GraterThan = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) > exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) > apply(rule[2], data, args);
 };
 const $GraterThanOrEqual = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) >= exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) >= apply(rule[2], data, args);
 };
 const $LessThan = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) < exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) < apply(rule[2], data, args);
 };
 const $LessThanOrEqual = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) <= exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) <= apply(rule[2], data, args);
 };
 const $Addition = (rule, data, args) => {
-    let value = +exports.apply(rule[1], data, args);
+    let value = +apply(rule[1], data, args);
     for (let i = 2; i < rule.length; i++) {
-        value = value + +exports.apply(rule[i], data, args);
+        value = value + +apply(rule[i], data, args);
     }
     return value;
 };
 const $Multiplication = (rule, data, args) => {
-    let value = +exports.apply(rule[1], data, args);
+    let value = +apply(rule[1], data, args);
     for (let i = 2; i < rule.length; i++) {
-        value = value * +exports.apply(rule[i], data, args);
+        value = value * +apply(rule[i], data, args);
     }
     return value;
 };
 const $Subtraction = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) - exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) - apply(rule[2], data, args);
 };
 const $Division = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) / exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) / apply(rule[2], data, args);
 };
 const $Modulo = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) % exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) % apply(rule[2], data, args);
 };
 const $Exponentiation = (rule, data, args) => {
-    return Math.pow(exports.apply(rule[1], data, args), exports.apply(rule[2], data, args));
+    return Math.pow(apply(rule[1], data, args), apply(rule[2], data, args));
 };
 const $In = (rule, data, args) => {
-    return exports.apply(rule[1], data, args) in exports.apply(rule[2], data, args);
+    return apply(rule[1], data, args) in apply(rule[2], data, args);
 };
 const $Typeof = (rule, data, args) => {
-    return typeof exports.apply(rule[1], data, args);
+    return typeof apply(rule[1], data, args);
 };
 const $Method = (rule, data, args) => {
-    return exports.apply(rule[1], data, args)[exports.apply(rule[2], data, args)](...rule.slice(3).map(item => exports.apply(item, data, args)));
+    return apply(rule[1], data, args)[apply(rule[2], data, args)](...rule.slice(3).map(item => apply(item, data, args)));
 };
 const $Arrow = (rule, data, args) => {
-    return (...args) => exports.apply(rule[1], data, args);
+    return (...args) => apply(rule[1], data, args);
 };
 const $Array = (rule, data, args) => {
-    return rule.slice(1).map(item => exports.apply(item, data, args));
+    return rule.slice(1).map(item => apply(item, data, args));
 };
 const $Undefined = (rule, data, args) => {
     return undefined;
 };
-exports.apply = (rule, data, args) => {
+const apply = (rule, data, args) => {
     if (isRule(rule)) {
         switch (rule[0]) {
             case '$': return $(rule, data, args);
@@ -149,3 +149,7 @@ exports.apply = (rule, data, args) => {
     }
     return rule;
 };
+function JsLogic(rule, data) {
+    return apply(rule, data, undefined);
+}
+exports.JsLogic = JsLogic;

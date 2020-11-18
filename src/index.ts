@@ -206,7 +206,7 @@ const $Undefined: Operator<Rule$Undefined, any> = (rule, data, args) => {
   return undefined;
 };
 
-export const apply: Operator<RuleOrValue, any> = (rule, data, args) => {
+const apply: Operator<RuleOrValue, any> = (rule, data, args) => {
   if (isRule(rule)) {
     switch (rule[0]) {
       case '$': return $(rule, data, args);
@@ -246,3 +246,7 @@ export const apply: Operator<RuleOrValue, any> = (rule, data, args) => {
   }
   return rule;
 };
+
+export function JsLogic(rule: RuleOrValue, data?: any): any {
+  return apply(rule, data, undefined!);
+}
