@@ -62,7 +62,7 @@ type Rule =
   | Rule$Undefined
   ;
 
-type RuleOrValue = null | number | string | object | Rule;
+export type RuleOrValue = null | number | string | object | Rule;
 
 type Operator<Rule, Returns> = (rule: Rule, data: any, args: any[]) => Returns;
 
