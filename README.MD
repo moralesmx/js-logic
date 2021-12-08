@@ -25,24 +25,24 @@ const data = {
 data.items.reduce((total, item) => total + (item.price - item.discount) * item.amount, 0);
 
 // JsLogic
-JsLogic(
+const logic = JSON.stringify(
   ['$()', ['$', 'items'], 'reduce',
     ['$=>',
       ['$+',
-        ['$$', 0],
+        ['$$', 0, 0],
         ['$*',
           ['$-',
-            ['$$', 1, 'price'],
-            ['$$', 1, 'discount'],
+            ['$$', 0, 1, 'price'],
+            ['$$', 0, 1, 'discount'],
           ],
-          ['$$', 1, 'amount'],
+          ['$$', 0, 1, 'amount'],
         ],
-      ]
+      ],
     ],
-    0
-  ],
-  data
+    0,
+  ]
 );
+JsLogic(logic, data);
 
 // Result
 100
